@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KJG Buoy Tracker — Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+</head>
+<body class="dash-body">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <svg width="36" height="36" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#E63329" stroke-width="5" stroke-dasharray="60 88"/>
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#2E7FC7" stroke-width="5" stroke-dasharray="60 88" stroke-dashoffset="-60"/>
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#4BAE48" stroke-width="5" stroke-dasharray="56 92" stroke-dashoffset="-120"/>
+      <text x="32" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#fff" font-family="'Segoe UI',sans-serif">kjg</text>
+    </svg>
+    <div>
+      <div class="topbar-logo-text">KJG TRACKER</div>
+      <div class="topbar-logo-sub">Buoy Monitoring</div>
+    </div>
+  </div>
+
+  <div class="topbar-sep"></div>
+  <span class="topbar-title" id="page-title">Dashboard Utama</span>
+  <div class="topbar-spacer"></div>
+
+  <div class="live-badge">
+    <span class="dot dot-green"></span>
+    <span id="last-update">Update 6 jam sekali</span>
+  </div>
+
+  <div class="topbar-sep"></div>
+
+  <div class="topbar-user" onclick="toggleUserMenu()">
+    <div class="user-avatar" id="user-avatar">AD</div>
+    <div>
+      <div class="user-name" id="user-name">Admin</div>
+      <div class="user-role" id="user-role">Administrator</div>
+    </div>
+  </div>
+
+  <button class="btn-logout" onclick="logout()">Keluar</button>
+</header>
+
+<!-- TOAST CONTAINER -->
+<div id="toast"></div>
+
+<!-- MAIN CONTENT -->
+<div class="dash-content">
+
+  <!-- STAT CARDS -->
+  <div class="stat-row" id="stat-row">
+    <div class="stat-card" onclick="filterList('all')">
+      <div class="stat-icon-wrap ic-blue">⚓</div>
+      <div class="stat-num" id="s-total">—</div>
+      <div class="stat-label">Total Buoy</div>
+      <div class="stat-sub sub-up" id="s-total-sub">Memuat...</div>
+    </div>
+    <div class="stat-card" onclick="filterList('ok')">
+      <div class="stat-icon-wrap ic-green">✅</div>
+      <div class="stat-num" id="s-active">—</div>
+      <div class="stat-label">Buoy Aktif</div>
+      <div class="stat-sub sub-up" id="s-active-sub"></div>
+    </div>
+    <div class="stat-card" onclick="filterList('alert')">
+      <div class="stat-icon-wrap ic-red">⚠️</div>
+      <div class="stat-num" id="s-alert">—</div>
+      <div class="stat-label">Peringatan</div>
+      <div class="stat-sub sub-down" id="s-alert-sub"></div>
+    </div>
+    <div class="stat-card" onclick="filterList('offline')">
+      <div class="stat-icon-wrap ic-orange">📵</div>
+      <div class="stat-num" id="s-offline">—</div>
+      <div class="stat-label">Offline</div>
+      <div class="stat-sub" id="s-offline-sub"></div>
+    </div>
+  </div>
+
+  <!-- MAP + SIDE PANEL -->
+  <div class="main-grid">
+
+    <!-- PETA -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🗺️ Peta Posisi Buoy</div>
+          <div class="card-meta" id="map-meta">Perairan Indonesia — Data GPS</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-outline btn-sm" onclick="toggleGeofence()">⬡ Geofence</button>
+          <button class="btn btn-outline btn-sm" onclick="fitAllMarkers()">⊕ Tampilkan Semua</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddBouyModal()">+ Tambah Buoy</button>
+        </div>
+      </div>
+      <div id="map"></div>
+      <div class="map-toolbar">
+        <span style="font-size:12px;color:var(--muted)">Filter:</span>
+        <button class="filter-chip active" onclick="setChip(this,'all')">Semua</button>
+        <button class="filter-chip" onclick="setChip(this,'ok')">✅ Aman</button>
+        <button class="filter-chip" onclick="setChip(this,'alert')">⚠️ Alert</button>
+        <button class="filter-chip" onclick="setChip(this,'offline')">📵 Offline</button>
+      </div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side-panel">
+      <!-- LIST BOUY -->
+      <div class="card bouy-list-card">
+        <div class="card-header">
+          <div class="card-title">Daftar Buoy</div>
+          <span class="card-meta" id="list-count"></span>
+        </div>
+        <div class="search-box">
+          <input class="search-input" type="text" placeholder="Cari nama bouy..." oninput="searchBouy(this.value)" id="search-input"/>
+        </div>
+        <div class="bouy-list" id="bouy-list">
+          <div class="empty-state">
+            <span style="font-size:32px">⏳</span>
+            <p>Memuat data buoy...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETAIL -->
+      <div class="card detail-card" id="detail-card">
+        <div class="detail-header">
+          <div class="detail-icon" id="d-icon">⚓</div>
+          <div>
+            <div class="detail-name" id="d-name">Pilih Buoy</div>
+            <div class="detail-id" id="d-id">Klik buoy untuk lihat detail</div>
+          </div>
+        </div>
+        <div id="d-body" style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">
+          Pilih buoy dari daftar atau peta
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TABLE -->
+  <div class="card history-card">
+    <div class="card-header">
+      <div class="card-title">📋 Log Aktivitas Terakhir</div>
+      <button class="btn btn-outline btn-sm" onclick="loadHistory()">🔄 Refresh</button>
+    </div>
+    <div class="history-table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Waktu Kirim</th>
+            <th>ID Buoy</th>
+            <th>Nama</th>
+            <th>Koordinat</th>
+            <th>Baterai</th>
+            <th>Status</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Memuat log...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL TAMBAH BOUY -->
+<div class="modal-overlay" id="modal-add" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚓ Tambah Buoy Baru</div>
+      <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nama Buoy *</label>
+      <input class="form-input" type="text" id="add-name" placeholder="Contoh: Bouy Utara A"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Titik Lintang (Latitude) *</label>
+        <input class="form-input" type="number" id="add-lat" placeholder="-5.6235" step="0.0001"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Titik Bujur (Longitude) *</label>
+        <input class="form-input" type="number" id="add-lng" placeholder="105.3142" step="0.0001"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Radius Geofence (km)</label>
+        <input class="form-input" type="number" id="add-fence" placeholder="2.0" value="2.0" step="0.5"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keterangan</label>
+        <input class="form-input" type="text" id="add-desc" placeholder="Opsional"/>
+      </div>
+    </div>
+
+    <div style="background:var(--blue-light);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--blue-dark);margin-bottom:8px">
+      💡 Masukkan koordinat GPS awal buoy. Setelah buoy mengirim data, posisi akan diperbarui otomatis setiap 6 jam.
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add')">Batal</button>
+      <button class="btn btn-primary" onclick="submitAddBouy()">Tambah Buoy</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT BOUY -->
+<div class="modal-overlay" id="modal-edit" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Buoy</div>
+      <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
+    </div>
+    <input type="hidden" id="edit-id"/>
+    <div class="form-group">
+      <label class="form-label">Nama Buoy *</label>
+      <input class="form-input" type="text" id="edit-name"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Latitude</label>
+        <input class="form-input" type="number" id="edit-lat" step="0.0001"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Longitude</label>
+        <input class="form-input" type="number" id="edit-lng" step="0.0001"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Radius Geofence (km)</label>
+        <input class="form-input" type="number" id="edit-fence" step="0.5"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keterangan</label>
+        <input class="form-input" type="text" id="edit-desc"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteBouy()">Hapus</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" onclick="closeModal('modal-edit')">Batal</button>
+      <button class="btn btn-primary" onclick="submitEditBouy()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>
