@@ -3,7 +3,7 @@
 //  Interval kirim data: 6 jam (sesuai firmware)
 // ============================================
 
-const API = 'http://localhost:3001/api';
+const API = '/api';
 
 // ── AUTH GUARD ────────────────────────────────
 const token = localStorage.getItem('kjg_token');

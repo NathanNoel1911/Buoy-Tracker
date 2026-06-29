@@ -2,7 +2,7 @@
 //  KJG BOUY TRACKER — Auth JS (Login Page)
 // ============================================
 
-const API = 'http://localhost:3001/api';
+const API = '/api';
 
 // Cek jika sudah login → langsung ke dashboard
 if (localStorage.getItem('kjg_token')) {

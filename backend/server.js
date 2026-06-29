@@ -46,8 +46,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve frontend di production (opsional)
-// app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Serve frontend di production
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
 
 // ── 404 ───────────────────────────────────────
 app.use((req, res) => {
