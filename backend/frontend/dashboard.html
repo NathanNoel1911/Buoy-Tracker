@@ -3,25 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KJG Buoy Tracker — Dashboard</title>
+<title>KJG Bouy Tracker — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/dashboard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body class="dash-body">
 
+<!-- ============================================================
+     SVG ICON SPRITE — semua icon didefinisikan sekali, dipakai via <use>
+     Pengganti emoji di seluruh dashboard
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-anchor" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2.25" stroke-width="1.75"/><path d="M12 7.5V21" stroke-width="1.75" stroke-linecap="round"/><path d="M5 12H2.5M19 12H21.5" stroke-width="1.75" stroke-linecap="round"/><path d="M4 12c0 4.42 3.58 8 8 8s8-3.58 8-8" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none"><path d="M20 10.5c0 5-8 11-8 11s-8-6-8-11a8 8 0 1 1 16 0Z" stroke-width="1.75" stroke-linejoin="round"/><circle cx="12" cy="10.5" r="2.75" stroke-width="1.75"/></symbol>
+    <symbol id="i-map-trifold" viewBox="0 0 24 24" fill="none"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke-width="1.75"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none"><path d="M18 9.5C18 7.5 17 4 12 4S6 7.5 6 9.5C6 14 4 15 4 16.5h16C20 15 18 14 18 9.5Z" stroke-width="1.75" stroke-linejoin="round"/><path d="M10 19.5a2.1 2.1 0 0 0 4 0" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none"><path d="M10.5 3.9c.6-1.07 2.4-1.07 3 0l7.7 13.6c.58 1.03-.18 2.3-1.35 2.3H4.15c-1.17 0-1.93-1.27-1.35-2.3L10.5 3.9Z" stroke-width="1.75" stroke-linejoin="round"/><path d="M12 9.5v4" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="16.3" r="0.9"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke-width="1.75"/><path d="m8.5 12.3 2.2 2.2 4.8-5" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke-width="1.75" stroke-linecap="round"/><path d="M5 8.5C7.5 6.3 9.8 5.5 12 5.5c2.2 0 4.5.8 7 3" stroke-width="1.75" stroke-linecap="round"/><path d="M8.2 12.2c1.2-1 2.4-1.5 3.8-1.5 1.1 0 2.1.3 3.1.9" stroke-width="1.75" stroke-linecap="round"/><path d="M10.5 16c.5-.4 1-.6 1.5-.6.5 0 1 .2 1.4.5" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="19" r="1"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="7" width="16" height="10" rx="2" stroke-width="1.75"/><path d="M21.5 10v4" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-signal" viewBox="0 0 24 24" fill="none"><rect x="3" y="15" width="3.5" height="6" rx="1"/><rect x="9" y="11" width="3.5" height="10" rx="1"/><rect x="15" y="7" width="3.5" height="14" rx="1"/></symbol>
+    <symbol id="i-satellite" viewBox="0 0 24 24" fill="none"><rect x="8.5" y="8.5" width="7" height="7" rx="1" transform="rotate(45 12 12)" stroke-width="1.75"/><path d="M3 12c0-2.5 1-4.7 2.6-6.4" stroke-width="1.75" stroke-linecap="round"/><path d="M18.4 18.4c1.6-1.7 2.6-3.9 2.6-6.4" stroke-width="1.75" stroke-linecap="round"/><path d="M18 3l3 3M21 3l-3 3" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24" fill="none"><path d="M14.5 4.5 19.5 9.5 8 21H3v-5L14.5 4.5Z" stroke-width="1.75" stroke-linejoin="round"/><path d="m12 7 5 5" stroke-width="1.75"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke-width="1.75"/><path d="m19 19-3.5-3.5" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-layout-grid" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.5" stroke-width="1.75"/><rect x="13" y="3" width="8" height="8" rx="1.5" stroke-width="1.75"/><rect x="3" y="13" width="8" height="8" rx="1.5" stroke-width="1.75"/><rect x="13" y="13" width="8" height="8" rx="1.5" stroke-width="1.75"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24" fill="none"><path d="M3 11a8 8 0 1 1 1.85 5.1" stroke-width="1.75" stroke-linecap="round"/><path d="M2 17v-4h4" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 7v4.5l3 2" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-geofence" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke-width="1.75" stroke-dasharray="2.5 3"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24" fill="none"><path d="M9 3H3v6" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 21h6v-6" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3l-8 8" stroke-width="1.75" stroke-linecap="round"/><path d="M3 21l8-8" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="m16 17 5-5-5-5" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12H9" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none"><path d="M4 7h16" stroke-width="1.75" stroke-linecap="round"/><path d="M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7" stroke-width="1.75"/><path d="m6 7 1 13.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-calendar-clock" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke-width="1.75"/><path d="M3 9.5h18" stroke-width="1.75"/><path d="M8 3v3.5M16 3v3.5" stroke-width="1.75" stroke-linecap="round"/><circle cx="15.5" cy="15" r="3.5" fill="white" stroke-width="1.5"/><path d="M15.5 13.3V15l1.2 1.1" stroke-width="1.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke-width="1.75"/><path d="M4.5 20c0-4 3.3-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke-width="1.75"/><path d="m15 9-2 6-4-2 2-6 4 2Z" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24" fill="none"><path d="M3 13a9 9 0 1 1 18 0" stroke-width="1.75" stroke-linecap="round"/><path d="M12 13l4-5" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="13" r="1.3" fill="currentColor" stroke="none"/></symbol>
+  </defs>
+</svg>
+
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="topbar-logo">
-    <svg width="36" height="36" viewBox="0 0 64 64">
-      <circle cx="32" cy="32" r="28" fill="none" stroke="#E63329" stroke-width="5" stroke-dasharray="60 88"/>
-      <circle cx="32" cy="32" r="28" fill="none" stroke="#2E7FC7" stroke-width="5" stroke-dasharray="60 88" stroke-dashoffset="-60"/>
-      <circle cx="32" cy="32" r="28" fill="none" stroke="#4BAE48" stroke-width="5" stroke-dasharray="56 92" stroke-dashoffset="-120"/>
-      <text x="32" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#fff" font-family="'Segoe UI',sans-serif">kjg</text>
-    </svg>
+    <div class="brand-mark"><span>kjg</span></div>
     <div>
       <div class="topbar-logo-text">KJG TRACKER</div>
-      <div class="topbar-logo-sub">Buoy Monitoring</div>
+      <div class="topbar-logo-sub">Bouy Monitoring</div>
     </div>
   </div>
 
@@ -37,14 +66,19 @@
   <div class="topbar-sep"></div>
 
   <div class="topbar-user" onclick="toggleUserMenu()">
-    <div class="user-avatar" id="user-avatar">AD</div>
+    <div class="user-avatar">
+      <svg width="16" height="16" style="stroke:#fff"><use href="#i-user"/></svg>
+    </div>
     <div>
       <div class="user-name" id="user-name">Admin</div>
       <div class="user-role" id="user-role">Administrator</div>
     </div>
   </div>
 
-  <button class="btn-logout" onclick="logout()">Keluar</button>
+  <button class="btn-logout" onclick="logout()">
+    <svg width="15" height="15" style="stroke:currentColor"><use href="#i-logout"/></svg>
+    Keluar
+  </button>
 </header>
 
 <!-- TOAST CONTAINER -->
@@ -56,25 +90,33 @@
   <!-- STAT CARDS -->
   <div class="stat-row" id="stat-row">
     <div class="stat-card" onclick="filterList('all')">
-      <div class="stat-icon-wrap ic-blue">⚓</div>
+      <div class="stat-icon-wrap ic-blue">
+        <svg width="19" height="19" style="stroke:var(--blue)"><use href="#i-anchor"/></svg>
+      </div>
       <div class="stat-num" id="s-total">—</div>
-      <div class="stat-label">Total Buoy</div>
+      <div class="stat-label">Total Bouy</div>
       <div class="stat-sub sub-up" id="s-total-sub">Memuat...</div>
     </div>
     <div class="stat-card" onclick="filterList('ok')">
-      <div class="stat-icon-wrap ic-green">✅</div>
+      <div class="stat-icon-wrap ic-green">
+        <svg width="19" height="19" style="stroke:var(--green)"><use href="#i-check-circle"/></svg>
+      </div>
       <div class="stat-num" id="s-active">—</div>
-      <div class="stat-label">Buoy Aktif</div>
+      <div class="stat-label">Bouy Aktif</div>
       <div class="stat-sub sub-up" id="s-active-sub"></div>
     </div>
     <div class="stat-card" onclick="filterList('alert')">
-      <div class="stat-icon-wrap ic-red">⚠️</div>
+      <div class="stat-icon-wrap ic-red">
+        <svg width="19" height="19" style="stroke:var(--red)"><use href="#i-alert-triangle"/></svg>
+      </div>
       <div class="stat-num" id="s-alert">—</div>
       <div class="stat-label">Peringatan</div>
       <div class="stat-sub sub-down" id="s-alert-sub"></div>
     </div>
     <div class="stat-card" onclick="filterList('offline')">
-      <div class="stat-icon-wrap ic-orange">📵</div>
+      <div class="stat-icon-wrap ic-orange">
+        <svg width="19" height="19" style="stroke:var(--amber)"><use href="#i-wifi-off"/></svg>
+      </div>
       <div class="stat-num" id="s-offline">—</div>
       <div class="stat-label">Offline</div>
       <div class="stat-sub" id="s-offline-sub"></div>
@@ -87,23 +129,44 @@
     <!-- PETA -->
     <div class="card">
       <div class="card-header">
-        <div>
-          <div class="card-title">🗺️ Peta Posisi Buoy</div>
-          <div class="card-meta" id="map-meta">Perairan Indonesia — Data GPS</div>
+        <div class="card-title-group">
+          <svg width="16" height="16" style="stroke:var(--ink-700, #2C3340)"><use href="#i-map-pin"/></svg>
+          <div>
+            <div class="card-title">Peta Posisi Bouy</div>
+            <div class="card-meta" id="map-meta">Perairan Indonesia — Data GPS</div>
+          </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn btn-outline btn-sm" onclick="toggleGeofence()">⬡ Geofence</button>
-          <button class="btn btn-outline btn-sm" onclick="fitAllMarkers()">⊕ Tampilkan Semua</button>
-          <button class="btn btn-primary btn-sm" onclick="openAddBouyModal()">+ Tambah Buoy</button>
+          <button class="btn btn-outline btn-sm" onclick="toggleGeofence()">
+            <svg width="14" height="14" style="stroke:currentColor"><use href="#i-geofence"/></svg>
+            Geofence
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="fitAllMarkers()">
+            <svg width="14" height="14" style="stroke:currentColor"><use href="#i-expand"/></svg>
+            Tampilkan Semua
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddBouyModal()">
+            <svg width="14" height="14" style="stroke:#fff"><use href="#i-plus"/></svg>
+            Tambah Bouy
+          </button>
         </div>
       </div>
       <div id="map"></div>
       <div class="map-toolbar">
         <span style="font-size:12px;color:var(--muted)">Filter:</span>
         <button class="filter-chip active" onclick="setChip(this,'all')">Semua</button>
-        <button class="filter-chip" onclick="setChip(this,'ok')">✅ Aman</button>
-        <button class="filter-chip" onclick="setChip(this,'alert')">⚠️ Alert</button>
-        <button class="filter-chip" onclick="setChip(this,'offline')">📵 Offline</button>
+        <button class="filter-chip" onclick="setChip(this,'ok')">
+          <svg width="12" height="12" style="stroke:var(--green)"><use href="#i-check-circle"/></svg>
+          Aman
+        </button>
+        <button class="filter-chip" onclick="setChip(this,'alert')">
+          <svg width="12" height="12" style="stroke:var(--red)"><use href="#i-alert-triangle"/></svg>
+          Alert
+        </button>
+        <button class="filter-chip" onclick="setChip(this,'offline')">
+          <svg width="12" height="12" style="stroke:var(--muted)"><use href="#i-wifi-off"/></svg>
+          Offline
+        </button>
       </div>
     </div>
 
@@ -112,16 +175,17 @@
       <!-- LIST BOUY -->
       <div class="card bouy-list-card">
         <div class="card-header">
-          <div class="card-title">Daftar Buoy</div>
+          <div class="card-title">Daftar Bouy</div>
           <span class="card-meta" id="list-count"></span>
         </div>
         <div class="search-box">
+          <svg width="14" height="14" style="stroke:var(--muted);flex-shrink:0"><use href="#i-search"/></svg>
           <input class="search-input" type="text" placeholder="Cari nama bouy..." oninput="searchBouy(this.value)" id="search-input"/>
         </div>
         <div class="bouy-list" id="bouy-list">
           <div class="empty-state">
-            <span style="font-size:32px">⏳</span>
-            <p>Memuat data buoy...</p>
+            <svg width="32" height="32" style="stroke:var(--muted)"><use href="#i-anchor"/></svg>
+            <p>Memuat data bouy...</p>
           </div>
         </div>
       </div>
@@ -129,14 +193,16 @@
       <!-- DETAIL -->
       <div class="card detail-card" id="detail-card">
         <div class="detail-header">
-          <div class="detail-icon" id="d-icon">⚓</div>
+          <div class="detail-icon" id="d-icon">
+            <svg width="22" height="22" style="stroke:var(--blue)"><use href="#i-anchor"/></svg>
+          </div>
           <div>
-            <div class="detail-name" id="d-name">Pilih Buoy</div>
-            <div class="detail-id" id="d-id">Klik buoy untuk lihat detail</div>
+            <div class="detail-name" id="d-name">Pilih Bouy</div>
+            <div class="detail-id" id="d-id">Klik bouy untuk lihat detail</div>
           </div>
         </div>
         <div id="d-body" style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">
-          Pilih buoy dari daftar atau peta
+          Pilih bouy dari daftar atau peta
         </div>
       </div>
     </div>
@@ -145,15 +211,21 @@
   <!-- HISTORY TABLE -->
   <div class="card history-card">
     <div class="card-header">
-      <div class="card-title">📋 Log Aktivitas Terakhir</div>
-      <button class="btn btn-outline btn-sm" onclick="loadHistory()">🔄 Refresh</button>
+      <div class="card-title-group">
+        <svg width="16" height="16" style="stroke:var(--ink-700, #2C3340)"><use href="#i-history"/></svg>
+        <div class="card-title">Log Aktivitas Terakhir</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadHistory()">
+        <svg width="14" height="14" style="stroke:currentColor"><use href="#i-history"/></svg>
+        Refresh
+      </button>
     </div>
     <div class="history-table-wrap">
       <table class="history-table">
         <thead>
           <tr>
             <th>Waktu Kirim</th>
-            <th>ID Buoy</th>
+            <th>ID Bouy</th>
             <th>Nama</th>
             <th>Koordinat</th>
             <th>Baterai</th>
@@ -174,12 +246,17 @@
 <div class="modal-overlay" id="modal-add" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">⚓ Tambah Buoy Baru</div>
-      <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+      <div class="modal-title">
+        <svg width="18" height="18" style="stroke:var(--blue)"><use href="#i-anchor"/></svg>
+        Tambah Bouy Baru
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-add')">
+        <svg width="14" height="14" style="stroke:currentColor"><use href="#i-x"/></svg>
+      </button>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Nama Buoy *</label>
+      <label class="form-label">Nama Bouy *</label>
       <input class="form-input" type="text" id="add-name" placeholder="Contoh: Bouy Utara A"/>
     </div>
     <div class="form-row">
@@ -203,13 +280,17 @@
       </div>
     </div>
 
-    <div style="background:var(--blue-light);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--blue-dark);margin-bottom:8px">
-      💡 Masukkan koordinat GPS awal buoy. Setelah buoy mengirim data, posisi akan diperbarui otomatis setiap 6 jam.
+    <div class="info-banner">
+      <svg width="16" height="16" style="stroke:var(--blue);flex-shrink:0"><use href="#i-compass"/></svg>
+      <span>Masukkan koordinat GPS awal bouy. Setelah bouy mengirim data, posisi akan diperbarui otomatis setiap 6 jam.</span>
     </div>
 
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-add')">Batal</button>
-      <button class="btn btn-primary" onclick="submitAddBouy()">Tambah Buoy</button>
+      <button class="btn btn-primary" onclick="submitAddBouy()">
+        <svg width="14" height="14" style="stroke:#fff"><use href="#i-plus"/></svg>
+        Tambah Bouy
+      </button>
     </div>
   </div>
 </div>
@@ -218,12 +299,17 @@
 <div class="modal-overlay" id="modal-edit" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">✏️ Edit Buoy</div>
-      <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
+      <div class="modal-title">
+        <svg width="18" height="18" style="stroke:var(--blue)"><use href="#i-pencil"/></svg>
+        Edit Bouy
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-edit')">
+        <svg width="14" height="14" style="stroke:currentColor"><use href="#i-x"/></svg>
+      </button>
     </div>
     <input type="hidden" id="edit-id"/>
     <div class="form-group">
-      <label class="form-label">Nama Buoy *</label>
+      <label class="form-label">Nama Bouy *</label>
       <input class="form-input" type="text" id="edit-name"/>
     </div>
     <div class="form-row">
@@ -247,7 +333,10 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" onclick="deleteBouy()">Hapus</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteBouy()">
+        <svg width="13" height="13" style="stroke:#fff"><use href="#i-trash"/></svg>
+        Hapus
+      </button>
       <div style="flex:1"></div>
       <button class="btn btn-outline" onclick="closeModal('modal-edit')">Batal</button>
       <button class="btn btn-primary" onclick="submitEditBouy()">Simpan</button>

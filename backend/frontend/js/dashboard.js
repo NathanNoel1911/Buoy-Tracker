@@ -13,7 +13,6 @@ const userData = JSON.parse(localStorage.getItem('kjg_user') || '{}');
 if (userData.username) {
   document.getElementById('user-name').textContent = userData.username;
   document.getElementById('user-role').textContent = userData.role || 'Operator';
-  document.getElementById('user-avatar').textContent = userData.username.slice(0,2).toUpperCase();
 }
 
 function logout() {
@@ -36,12 +35,23 @@ async function apiFetch(path, options = {}) {
   return res.json();
 }
 
+// ── ICON HELPERS (SVG sprite, pengganti emoji) ──
+function svgIcon(name, size = 14, color = 'currentColor') {
+  return `<svg width="${size}" height="${size}" style="stroke:${color};vertical-align:-2px"><use href="#${name}"/></svg>`;
+}
+
+function statusIconName(status) {
+  if (status === 'alert') return 'i-alert-triangle';
+  if (status === 'offline') return 'i-wifi-off';
+  return 'i-anchor';
+}
+
 // ── TOAST ─────────────────────────────────────
 function showToast(msg, type = 'info') {
   const el = document.createElement('div');
   el.className = `toast-item ${type}`;
-  const icons = { success: '✅', error: '❌', info: 'ℹ️', warn: '⚠️' };
-  el.innerHTML = `<span>${icons[type]||''}</span><span>${msg}</span>`;
+  const iconMap = { success: 'i-check-circle', error: 'i-alert-triangle', info: 'i-bell', warn: 'i-alert-triangle' };
+  el.innerHTML = `<span>${svgIcon(iconMap[type] || 'i-bell', 15)}</span><span>${msg}</span>`;
   document.getElementById('toast').appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
@@ -56,17 +66,17 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 function makeIcon(status) {
   const cfg = {
-    ok:      { bg: '#4BAE48', emoji: '⚓' },
-    alert:   { bg: '#E63329', emoji: '⚠' },
-    offline: { bg: '#9CA3AF', emoji: '📵' }
+    ok:      { bg: '#4BAE48', icon: 'i-anchor' },
+    alert:   { bg: '#E63329', icon: 'i-alert-triangle' },
+    offline: { bg: '#9CA3AF', icon: 'i-wifi-off' }
   };
   const c = cfg[status] || cfg.ok;
   return L.divIcon({
     className: '',
     html: `<div style="width:34px;height:34px;border-radius:50%;background:${c.bg};
       border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);
-      display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer">
-      ${c.emoji}</div>`,
+      display:flex;align-items:center;justify-content:center;cursor:pointer">
+      <svg width="16" height="16" style="stroke:#fff"><use href="#${c.icon}"/></svg></div>`,
     iconSize: [34, 34],
     iconAnchor: [17, 17]
   });
@@ -126,7 +136,7 @@ function renderList(filter = currentFilter, query = searchQuery) {
   if (list.length === 0) {
     document.getElementById('bouy-list').innerHTML = `
       <div class="empty-state">
-        <span style="font-size:32px">🔍</span>
+        ${svgIcon('i-search', 32, 'var(--ink-400)')}
         <p>Tidak ada bouy ${filter !== 'all' ? 'dengan status ini' : ''}</p>
       </div>`;
     return;
@@ -134,13 +144,13 @@ function renderList(filter = currentFilter, query = searchQuery) {
 
   document.getElementById('bouy-list').innerHTML = list.map(b => {
     const thumbClass = b.status === 'ok' ? 'thumb-ok' : b.status === 'alert' ? 'thumb-alert' : 'thumb-offline';
-    const emoji      = b.status === 'ok' ? '⚓' : b.status === 'alert' ? '⚠️' : '📵';
+    const iconColor  = b.status === 'ok' ? 'var(--green)' : b.status === 'alert' ? 'var(--red)' : 'var(--ink-500)';
     const sel        = selectedId === b.id ? 'selected' : '';
     const alertCls   = b.status === 'alert' ? 'is-alert' : b.status === 'offline' ? 'is-offline' : '';
     const lastSeen   = b.last_seen ? new Date(b.last_seen).toLocaleString('id-ID') : 'Belum ada data';
 
     return `<div class="bouy-item ${sel} ${alertCls}" onclick="selectBouy(${b.id})">
-      <div class="bouy-thumb ${thumbClass}">${emoji}</div>
+      <div class="bouy-thumb ${thumbClass}">${svgIcon(statusIconName(b.status), 17, iconColor)}</div>
       <div class="bouy-info">
         <div class="bouy-name">${b.name}</div>
         <div class="bouy-coord">${parseFloat(b.lat).toFixed(4)}, ${parseFloat(b.lng).toFixed(4)} · ${lastSeen}</div>
@@ -179,7 +189,9 @@ function selectBouy(id) {
 function renderDetail(b) {
   document.getElementById('d-name').textContent = b.name;
   document.getElementById('d-id').textContent = b.device_id || `ID-${b.id}`;
-  document.getElementById('d-icon').textContent = b.status === 'alert' ? '⚠️' : b.status === 'offline' ? '📵' : '⚓';
+
+  const dIconColor = b.status === 'alert' ? 'var(--red)' : b.status === 'offline' ? 'var(--ink-500)' : 'var(--blue)';
+  document.getElementById('d-icon').innerHTML = svgIcon(statusIconName(b.status), 22, dIconColor);
 
   const batt    = b.battery ?? '—';
   const speed   = b.speed != null ? parseFloat(b.speed).toFixed(1) + ' kn' : '—';
@@ -188,16 +200,16 @@ function renderDetail(b) {
   const lastSeen = b.last_seen ? new Date(b.last_seen).toLocaleString('id-ID') : 'Belum ada data';
 
   const alertHtml = b.status === 'alert'
-    ? `<div class="alert-strip">⚠️ <span>${b.alert_message || 'Bouy memerlukan perhatian segera'}</span></div>`
+    ? `<div class="alert-strip">${svgIcon('i-alert-triangle', 16)} <span>${b.alert_message || 'Bouy memerlukan perhatian segera'}</span></div>`
     : b.status === 'offline'
-    ? `<div class="alert-strip" style="background:#F3F4F6;border-color:var(--border)">📵 <span style="color:var(--muted)">Bouy tidak merespons — cek koneksi perangkat</span></div>`
+    ? `<div class="alert-strip" style="background:var(--ink-50);border-color:var(--ink-100)">${svgIcon('i-wifi-off', 16, 'var(--ink-500)')} <span style="color:var(--ink-500)">Bouy tidak merespons — cek koneksi perangkat</span></div>`
     : '';
 
   const bars = Array.from({length:4}, (_,i) =>
     `<div class="signal-bar ${i < signal ? 'active' : ''}" style="height:${(i+1)*4+4}px"></div>`
   ).join('');
 
-  const battColor = batt < 20 ? 'var(--red)' : batt < 40 ? '#D97706' : 'var(--text)';
+  const battColor = batt < 20 ? 'var(--red)' : batt < 40 ? 'var(--amber)' : 'var(--ink-900)';
 
   document.getElementById('d-body').innerHTML = `
     ${alertHtml}
@@ -212,7 +224,7 @@ function renderDetail(b) {
       </div>
       <div class="detail-item">
         <div class="detail-item-label">Kecepatan</div>
-        <div class="detail-item-value" style="color:${parseFloat(b.speed)>2?'var(--red)':'var(--text)'}">${speed}</div>
+        <div class="detail-item-value" style="color:${parseFloat(b.speed)>2?'var(--red)':'var(--ink-900)'}">${speed}</div>
       </div>
       <div class="detail-item">
         <div class="detail-item-label">Baterai</div>
@@ -227,12 +239,12 @@ function renderDetail(b) {
         <div class="detail-item-value">${sats}</div>
       </div>
     </div>
-    <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">
-      📅 Data terakhir: ${lastSeen}
+    <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:12px;display:flex;align-items:center;gap:5px">
+      ${svgIcon('i-calendar-clock', 13, 'var(--ink-400)')} Data terakhir: ${lastSeen}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" style="flex:1" onclick="map.setView([${parseFloat(b.lat)},${parseFloat(b.lng)}],14)">🎯 Fokus Peta</button>
-      <button class="btn btn-outline btn-sm" style="flex:1" onclick="openEditModal(${b.id})">✏️ Edit</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="map.setView([${parseFloat(b.lat)},${parseFloat(b.lng)}],14)">${svgIcon('i-expand', 14, '#fff')} Fokus Peta</button>
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="openEditModal(${b.id})">${svgIcon('i-pencil', 14)} Edit</button>
     </div>`;
 }
 
@@ -251,11 +263,14 @@ function updateMarkers() {
     const lng = parseFloat(b.lng);
     if (isNaN(lat) || isNaN(lng)) return;
 
+    const statusText = b.status === 'ok' ? 'Aman' : b.status === 'alert' ? 'Alert' : 'Offline';
+    const statusColor = b.status === 'ok' ? 'var(--green)' : b.status === 'alert' ? 'var(--red)' : 'var(--ink-500)';
+
     const popupHtml = `<div class="bouy-popup">
-      <strong>⚓ ${b.name}</strong>
+      <strong style="display:flex;align-items:center;gap:6px">${svgIcon('i-anchor', 15, 'var(--ink-700)')} ${b.name}</strong>
       <div class="popup-row"><span>ID</span><span><code>${b.device_id||'—'}</code></span></div>
       <div class="popup-row"><span>Koordinat</span><span>${lat.toFixed(4)}, ${lng.toFixed(4)}</span></div>
-      <div class="popup-row"><span>Status</span><span>${b.status === 'ok' ? '✅ Aman' : b.status === 'alert' ? '⚠️ Alert' : '📵 Offline'}</span></div>
+      <div class="popup-row"><span>Status</span><span style="color:${statusColor};display:inline-flex;align-items:center;gap:4px">${svgIcon(statusIconName(b.status), 12, statusColor)} ${statusText}</span></div>
       <div class="popup-row"><span>Baterai</span><span>${b.battery != null ? b.battery + '%' : '—'}</span></div>
       <div style="margin-top:8px">
         <button onclick="selectBouy(${b.id})" style="width:100%;padding:6px;font-size:12px;background:#2E7FC7;color:#fff;border:none;border-radius:5px;cursor:pointer">Lihat Detail</button>
@@ -311,7 +326,7 @@ function updateMapMeta() {
 function renderHistory(logs) {
   if (!logs || logs.length === 0) {
     document.getElementById('history-body').innerHTML =
-      `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Belum ada log aktivitas</td></tr>`;
+      `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--ink-500)">Belum ada log aktivitas</td></tr>`;
     return;
   }
 
@@ -322,13 +337,13 @@ function renderHistory(logs) {
     const batt = h.battery != null ? h.battery + '%' : '—';
 
     return `<tr>
-      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${time}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--ink-500)">${time}</td>
       <td><code class="id-chip">${h.device_id || '—'}</code></td>
       <td style="font-weight:500">${h.bouy_name || '—'}</td>
-      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${parseFloat(h.lat).toFixed(4)}, ${parseFloat(h.lng).toFixed(4)}</td>
-      <td style="color:${h.battery < 20 ? 'var(--red)' : 'var(--text)'}">${batt}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--ink-500)">${parseFloat(h.lat).toFixed(4)}, ${parseFloat(h.lng).toFixed(4)}</td>
+      <td style="color:${h.battery < 20 ? 'var(--red)' : 'var(--ink-900)'}">${batt}</td>
       <td><span class="badge ${stClass}">${stLabel}</span></td>
-      <td style="color:var(--muted);font-size:12.5px">${h.note || '—'}</td>
+      <td style="color:var(--ink-500);font-size:12.5px">${h.note || '—'}</td>
     </tr>`;
   }).join('');
 }
@@ -413,7 +428,7 @@ async function deleteBouy() {
     showToast(`Bouy "${name}" telah dihapus`, 'success');
     closeModal('modal-edit');
     selectedId = null;
-    document.getElementById('d-body').innerHTML = '<p style="color:var(--muted);text-align:center;padding:12px">Pilih bouy dari daftar atau peta</p>';
+    document.getElementById('d-body').innerHTML = '<p style="color:var(--ink-500);text-align:center;padding:12px">Pilih bouy dari daftar atau peta</p>';
     document.getElementById('d-name').textContent = 'Pilih Bouy';
     document.getElementById('d-id').textContent = '';
     await loadBouys();
