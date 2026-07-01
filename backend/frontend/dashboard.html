@@ -8,15 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon.svg">
-<meta name="theme-color" content="#11151F">
 </head>
 <body class="dash-body">
 
-<!-- SVG ICON SPRITE -->
+<!-- ============================================================
+     SVG ICON SPRITE — semua icon didefinisikan sekali, dipakai via <use>
+     Pengganti emoji di seluruh dashboard
+     ============================================================ -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <symbol id="i-anchor" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2.25" stroke-width="1.75"/><path d="M12 7.5V21" stroke-width="1.75" stroke-linecap="round"/><path d="M5 12H2.5M19 12H21.5" stroke-width="1.75" stroke-linecap="round"/><path d="M4 12c0 4.42 3.58 8 8 8s8-3.58 8-8" stroke-width="1.75" stroke-linecap="round"/></symbol>
@@ -42,23 +41,10 @@
     <symbol id="i-user" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke-width="1.75"/><path d="M4.5 20c0-4 3.3-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke-width="1.75" stroke-linecap="round"/></symbol>
     <symbol id="i-compass" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke-width="1.75"/><path d="m15 9-2 6-4-2 2-6 4 2Z" stroke-width="1.5" stroke-linejoin="round"/></symbol>
     <symbol id="i-gauge" viewBox="0 0 24 24" fill="none"><path d="M3 13a9 9 0 1 1 18 0" stroke-width="1.75" stroke-linecap="round"/><path d="M12 13l4-5" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="13" r="1.3" fill="currentColor" stroke="none"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke-width="1.75" stroke-linecap="round"/></symbol>
   </defs>
 </svg>
 
-<!-- MOBILE HEADER (tampil hanya di HP) -->
-<header class="mobile-header">
-  <div class="mobile-header-title">
-    <div class="mobile-live-dot"></div>
-    KJG TRACKER
-  </div>
-  <button class="btn-logout" onclick="logout()" style="padding:6px 10px;font-size:11.5px;display:flex;align-items:center;gap:5px">
-    <svg width="13" height="13" style="stroke:currentColor"><use href="#i-logout"/></svg>
-    Keluar
-  </button>
-</header>
-
-<!-- TOPBAR (tampil hanya di desktop) -->
+<!-- TOPBAR -->
 <header class="topbar">
   <div class="topbar-logo">
     <div class="brand-mark"><span>kjg</span></div>
@@ -268,6 +254,7 @@
         <svg width="14" height="14" style="stroke:currentColor"><use href="#i-x"/></svg>
       </button>
     </div>
+
     <div class="form-group">
       <label class="form-label">Nama Bouy *</label>
       <input class="form-input" type="text" id="add-name" placeholder="Contoh: Bouy Utara A"/>
@@ -292,10 +279,12 @@
         <input class="form-input" type="text" id="add-desc" placeholder="Opsional"/>
       </div>
     </div>
+
     <div class="info-banner">
       <svg width="16" height="16" style="stroke:var(--blue);flex-shrink:0"><use href="#i-compass"/></svg>
       <span>Masukkan koordinat GPS awal bouy. Setelah bouy mengirim data, posisi akan diperbarui otomatis setiap 6 jam.</span>
     </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-add')">Batal</button>
       <button class="btn btn-primary" onclick="submitAddBouy()">
@@ -355,40 +344,7 @@
   </div>
 </div>
 
-<!-- MOBILE BOTTOM NAV (tampil hanya di HP) -->
-<nav class="mobile-nav">
-  <button class="mobile-nav-item active" onclick="mobileNav(this,'map')">
-    <svg width="20" height="20"><use href="#i-map-pin"/></svg>
-    <span>Peta</span>
-  </button>
-  <button class="mobile-nav-item" onclick="mobileNav(this,'list')">
-    <svg width="20" height="20"><use href="#i-anchor"/></svg>
-    <span>Bouy</span>
-  </button>
-  <button class="mobile-nav-item" onclick="mobileNav(this,'history')">
-    <svg width="20" height="20"><use href="#i-history"/></svg>
-    <span>Log</span>
-  </button>
-  <button class="mobile-nav-item" onclick="mobileNav(this,'add')">
-    <svg width="20" height="20"><use href="#i-plus"/></svg>
-    <span>Tambah</span>
-  </button>
-</nav>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="js/dashboard.js"></script>
-<script>
-function mobileNav(el, section) {
-  document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  if (section === 'add') { openAddBouyModal(); return; }
-  const targets = { map: '.main-grid', list: '.side-panel', history: '.history-card' };
-  const target = document.querySelector(targets[section]);
-  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
 </body>
 </html>
