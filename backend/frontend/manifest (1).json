@@ -1,0 +1,20 @@
+{
+  "name": "KJG Bouy Tracker",
+  "short_name": "KJG Tracker",
+  "description": "Sistem monitoring bouy real-time untuk perairan Indonesia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#11151F",
+  "theme_color": "#11151F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["navigation", "utilities"],
+  "lang": "id"
+}

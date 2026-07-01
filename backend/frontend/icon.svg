@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Background circle putih -->
+  <circle cx="96" cy="96" r="96" fill="#fff"/>
+
+  <!-- Ring luar 3 warna (merah, biru, hijau) -->
+  <!-- Biru kiri bawah -->
+  <path d="M96 10 A86 86 0 0 0 10 96" stroke="#2E7FC7" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <!-- Hijau kanan -->
+  <path d="M96 10 A86 86 0 0 1 182 96" stroke="#4BAE48" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <!-- Merah bawah -->
+  <path d="M10 96 A86 86 0 0 0 182 96" stroke="#E63329" stroke-width="10" fill="none" stroke-linecap="round"/>
+
+  <!-- Laut / gelombang biru navy -->
+  <ellipse cx="96" cy="115" rx="68" ry="28" fill="#0D2B4E"/>
+  <path d="M28 110 Q50 100 70 112 Q90 124 110 112 Q130 100 164 112 L164 143 Q130 131 110 143 Q90 155 70 143 Q50 131 28 143 Z" fill="#1A4F85"/>
+
+  <!-- Bouy/pelampung -->
+  <ellipse cx="96" cy="108" rx="14" ry="9" fill="#E63329"/>
+  <rect x="90" y="65" width="12" height="44" rx="4" fill="#1A2030"/>
+  <ellipse cx="96" cy="65" rx="7" ry="5" fill="#E63329"/>
+
+  <!-- Sinyal WiFi di atas tiang -->
+  <path d="M82 55 Q96 44 110 55" stroke="#E63329" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M87 49 Q96 41 105 49" stroke="#E63329" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="96" cy="44" r="3" fill="#E63329"/>
+
+  <!-- Pin lokasi bawah -->
+  <path d="M96 155 C88 145 80 138 80 130 A16 16 0 0 1 112 130 C112 138 104 145 96 155Z" fill="#E63329"/>
+  <circle cx="96" cy="130" r="6" fill="#fff"/>
+
+  <!-- Teks kjg -->
+  <text x="96" y="178" text-anchor="middle" font-family="'Inter','Arial Black',sans-serif" font-weight="900" font-size="18" fill="#1A2030" letter-spacing="2">kjg</text>
+</svg>
